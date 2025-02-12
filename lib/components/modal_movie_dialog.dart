@@ -13,14 +13,14 @@ class ModalMovieDialog extends ConsumerStatefulWidget {
 
 class _ModalMovieDialogState extends ConsumerState<ModalMovieDialog> {
   late TextEditingController _titleController = TextEditingController();
-  late GenreChoice _selectedGenre = GenreChoice.action;
+  late List<GenreChoice> _selectedGenres = [];
   bool get isEditing => widget.isEditing;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.movie?.title ?? '');
-    _selectedGenre = widget.movie?.genre ?? GenreChoice.action;
+    _selectedGenres = widget.movie?.genres.toList() ?? [];
   }
 
   @override
@@ -31,23 +31,40 @@ class _ModalMovieDialogState extends ConsumerState<ModalMovieDialog> {
       title: const Text('Add New Movie'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _titleController,
             decoration: const InputDecoration(labelText: 'Movie Title'),
           ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<GenreChoice>(
-            value: _selectedGenre,
-            decoration: const InputDecoration(labelText: 'Select Genre'),
-            items: GenreChoice.values.map((genre) {
-              return DropdownMenuItem(value: genre, child: Text(genre.name.toUpperCase()));
+          const SizedBox(height: 16),
+          const Text(
+            "Select Genres", // Add title above checkboxes
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Wrap(
+            alignment: WrapAlignment.start,
+            children: GenreChoice.values.map((genre) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Checkbox(
+                    value: _selectedGenres.contains(genre),
+                    onChanged: (isChecked) {
+                      setState(() {
+                        if (isChecked!) {
+                          _selectedGenres.add(genre);
+                        } else {
+                          _selectedGenres.remove(genre);
+                        }
+                      });
+                    },
+                  ),
+                  Text(genre.name.toUpperCase()),
+                ],
+              );
             }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedGenre = value!;
-              });
-            },
           ),
         ],
       ),
@@ -56,19 +73,19 @@ class _ModalMovieDialogState extends ConsumerState<ModalMovieDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: () {
+        InkWell(
+          onTap: () {
             if (_titleController.text.isNotEmpty) {
               if (isEditing) {
                 movieEvent.editList(
                   widget.movie!.id,
                   _titleController.text,
-                  _selectedGenre,
+                  _selectedGenres,
                 );
               } else {
                 movieEvent.addList(
                   _titleController.text,
-                  _selectedGenre,
+                  _selectedGenres,
                 );
               }
               Navigator.pop(context);

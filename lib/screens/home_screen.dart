@@ -20,7 +20,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final movieEvent = ref.watch(movieStateEventProvider.notifier);
 
     final filteredMovies =
-        selectedGenre == null ? movieList : movieList.where((movie) => movie.genre == selectedGenre).toList();
+        selectedGenre == null ? movieList : movieList.where((movie) => movie.genres.contains(selectedGenre)).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -120,7 +120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 size: 28,
                               ),
                               title: Text(movie.title),
-                              subtitle: Text("Genre: ${movie.genre.name}"),
+                              subtitle: Text("Genres: ${movie.genres.map((e) => e.name).join(", ")}"),
                             ),
                           ),
                         );
