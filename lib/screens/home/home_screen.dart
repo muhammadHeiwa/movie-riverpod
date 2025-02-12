@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:riverstate/components/modal_movie_dialog.dart';
+import 'package:riverstate/core/widget/app/app_drawer_widget.dart';
+import 'package:riverstate/riverpod/state_provider/genre_provider/genre_provider.dart';
+import 'package:riverstate/screens/home/components/modal_movie_dialog.dart';
 import 'package:riverstate/riverpod/state_provider/movie_provider/movie_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -12,12 +14,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  GenreChoice? selectedGenre;
+  String? selectedGenre;
 
   @override
   Widget build(BuildContext context) {
     final movieList = ref.watch(movieStateEventProvider);
     final movieEvent = ref.watch(movieStateEventProvider.notifier);
+    final genreList = ref.watch(genreStateProvider);
 
     final filteredMovies =
         selectedGenre == null ? movieList : movieList.where((movie) => movie.genres.contains(selectedGenre)).toList();
@@ -41,7 +44,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
+      drawer: AppDrawerWidget(),
       body: Column(
         children: [
           SingleChildScrollView(
@@ -57,11 +62,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   checkmarkColor: Colors.white,
                   onSelected: (_) => setState(() => selectedGenre = null),
                 ),
-                ...GenreChoice.values.map((genre) {
+                ...genreList.map((genre) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: ChoiceChip(
-                      label: Text(genre.name.toUpperCase()),
+                      label: Text(genre),
                       selected: selectedGenre == genre,
                       selectedColor: Colors.blue,
                       labelStyle: TextStyle(color: selectedGenre == genre ? Colors.white : Colors.black),
@@ -120,7 +125,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 size: 28,
                               ),
                               title: Text(movie.title),
-                              subtitle: Text("Genres: ${movie.genres.map((e) => e.name).join(", ")}"),
+                              subtitle: Text("Genres: ${movie.genres.join(', ')}"),
                             ),
                           ),
                         );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverstate/riverpod/state_provider/genre_provider/genre_provider.dart';
 import 'package:riverstate/riverpod/state_provider/movie_provider/movie_provider.dart';
 
 class ModalMovieDialog extends ConsumerStatefulWidget {
@@ -13,7 +14,7 @@ class ModalMovieDialog extends ConsumerStatefulWidget {
 
 class _ModalMovieDialogState extends ConsumerState<ModalMovieDialog> {
   late TextEditingController _titleController = TextEditingController();
-  late List<GenreChoice> _selectedGenres = [];
+  late List<String> _selectedGenres = [];
   bool get isEditing => widget.isEditing;
 
   @override
@@ -26,6 +27,7 @@ class _ModalMovieDialogState extends ConsumerState<ModalMovieDialog> {
   @override
   Widget build(BuildContext context) {
     final movieEvent = ref.watch(movieStateEventProvider.notifier);
+    final genreList = ref.watch(genreStateProvider);
 
     return AlertDialog(
       title: const Text('Add New Movie'),
@@ -45,7 +47,7 @@ class _ModalMovieDialogState extends ConsumerState<ModalMovieDialog> {
           const SizedBox(height: 5),
           Wrap(
             alignment: WrapAlignment.start,
-            children: GenreChoice.values.map((genre) {
+            children: genreList.map((genre) {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -61,7 +63,7 @@ class _ModalMovieDialogState extends ConsumerState<ModalMovieDialog> {
                       });
                     },
                   ),
-                  Text(genre.name.toUpperCase()),
+                  Text(genre),
                 ],
               );
             }).toList(),
